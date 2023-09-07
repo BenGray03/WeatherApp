@@ -8,23 +8,81 @@ import org.apache.http.util.EntityUtils;
 import com.google.gson.JsonObject;//JSON
 import com.google.gson.JsonParser;
 
-import java.io.IOException;
+import java.io.*;
+
 import java.text.DecimalFormat;
 import  java.util.Scanner;
 
+//basic plan:
+//
 public class WeatherApp {
     public static void main(String[] args) {
-        Scanner scanner= new Scanner(System.in);//ERROR
-        boolean passed = false;
-        String city = "";
-        while(!passed) {
-            System.out.print("What city would you like to know the weather of? ");
-            city = scanner.next();
-            passed = Check(city);
-            if(!passed) {
-                System.out.println("That is not a valid city.\nPlease check and try again");
+        Scanner scanner= new Scanner(System.in);
+        boolean loggedIn = true;
+        int option = 0;
+        while(loggedIn) {
+            getCities();
+            System.out.print("What would you like to do?\n1.Add City\n2.Remove City\n3.Exit");
+            option = scanner.nextInt();
+            switch (option){
+                case 1:
+                    addCity();
+                case 2:
+                    removeCity();
+                case 3:
+                    loggedIn = false;
+            }
+
+        }
+    }
+
+    public static void addCity(){
+        Scanner input = new Scanner(System.in);
+        System.out.println("What city would you like to add?");
+        String city = input.nextLine();
+        JsonObject info = cityInfo(city);
+        if(info != null) {
+            System.out.println("Is this the city?");
+            System.out.println(info);
+            try (FileWriter fw = new FileWriter("UserCities.txt", true);
+                 BufferedWriter bw = new BufferedWriter(fw);
+                 PrintWriter out = new PrintWriter(bw)) {
+                 out.println("the text");
+
+            } catch (IOException e) {
+
             }
         }
+    }
+
+    public static void removeCity(){
+
+    }
+
+    public static void getCities() {
+        System.out.println("Your cities:");
+        try {
+            File myObj = new File("/Users/bengray/Code/Java/Weather/src/main/java/UserCities.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                JsonObject info = cityInfo(data);
+                if(info != null) {
+                    printCityInfo(data, info);
+                }
+            }
+        }catch (FileNotFoundException e){
+            e.printStackTrace();
+        }
+    }
+    public static void printCityInfo(String name, JsonObject info){
+        double temperatureKelvin = info.get("temp").getAsDouble();
+        double Humidity = info.get("humidity").getAsDouble();
+        double temperatureCelsius = temperatureKelvin - 273.15;
+        String formattedTemp = new DecimalFormat("#.##").format(temperatureCelsius);
+        System.out.println(name + ": " + formattedTemp + " degrees " + "Humidity " + Humidity + "%");
+    }
+    public static JsonObject cityInfo(String city){
         // Replace "YOUR_API_KEY" with your actual OpenWeatherMap API key
         String apiKey = "bf8f764c56058ac0ccdc96141608afbf";// Replace with the city you want to get weather data for
 
@@ -44,37 +102,17 @@ public class WeatherApp {
             if (entity != null) {
                 // Convert the response entity to a string
                 String responseBody = EntityUtils.toString(entity);
-                System.out.println(responseBody); // Print the weather data (you'll parse this later
+                //System.out.println(responseBody); // Print the weather data (you'll parse this later
                 // )
                 JsonParser jsonParser = new JsonParser();
                 JsonObject jsonObject = jsonParser.parse(responseBody).getAsJsonObject();
 
-                // Extract the temperature (in Kelvin) from the JSON object
                 JsonObject main = jsonObject.getAsJsonObject("main");
-                double temperatureKelvin = main.get("temp").getAsDouble();
-                double Humidity = main.get("humidity").getAsDouble();
-
-                // Convert the temperature to Celsius or Fahrenheit, depending on your preference
-                double temperatureCelsius = temperatureKelvin - 273.15; // Convert from Kelvin to Celsius
-                double temperatureFahrenheit = (temperatureKelvin - 273.15) * 9 / 5 + 32; // Convert from Kelvin to Fahrenheit
-                String i = new DecimalFormat("#.##").format(temperatureCelsius);
-                System.out.println("Temperature in Celsius: " + i);
-                System.out.println("Temperature in Fahrenheit: " + temperatureFahrenheit);
-                System.out.println("Humidity: " + Humidity);
+                return main;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
-
-    public static boolean Check(String city){
-        String [] cities = {"London", "Paris", "Bordeaux"};
-        for (int i = 0; i < cities.length; i++){
-            if(city.equalsIgnoreCase(cities[i])){
-                return true;
-            }
-        }
-
-        return false;
-    } // only update is to get a list of all the cities in the world and put in like a hash map for better searching
 }
