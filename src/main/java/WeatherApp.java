@@ -19,7 +19,7 @@ public class WeatherApp {
     public static void main(String[] args) {
         Scanner scanner= new Scanner(System.in);
         boolean loggedIn = true;
-        int option = 0;
+        int option;
         while(loggedIn) {
             getCities();
             System.out.println("What would you like to do?\n1.Add City\n2.Remove City\n3.Exit");
@@ -85,7 +85,7 @@ public class WeatherApp {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error 2 removing file please try again");
         }
 
         // Replace the original file with the temporary file
@@ -109,7 +109,7 @@ public class WeatherApp {
                 }
             }
         }catch (FileNotFoundException e){
-            e.printStackTrace();
+            System.out.println("Error 1!");
         }
     }
     public static void printCityInfo(String name, JsonObject info){
@@ -148,7 +148,7 @@ public class WeatherApp {
                 return main;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error 3!");
         }
         return null;
     }
