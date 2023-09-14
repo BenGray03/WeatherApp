@@ -22,15 +22,18 @@ public class WeatherApp {
         int option = 0;
         while(loggedIn) {
             getCities();
-            System.out.print("What would you like to do?\n1.Add City\n2.Remove City\n3.Exit");
+            System.out.println("What would you like to do?\n1.Add City\n2.Remove City\n3.Exit");
             option = scanner.nextInt();
             switch (option){
                 case 1:
                     addCity();
+                    break;
                 case 2:
                     removeCity();
+                    break;
                 case 3:
                     loggedIn = false;
+                    break;
             }
 
         }
@@ -44,19 +47,53 @@ public class WeatherApp {
         if(info != null) {
             System.out.println("Is this the city?");
             System.out.println(info);
-            try (FileWriter fw = new FileWriter("UserCities.txt", true);
+            try (FileWriter fw = new FileWriter("/Users/bengray/Code/Java/Weather/src/main/java/UserCities.txt", true);
                  BufferedWriter bw = new BufferedWriter(fw);
                  PrintWriter out = new PrintWriter(bw)) {
-                 out.println("the text");
-
+                 out.println(city);
+                 System.out.println("Successfully added city!");
             } catch (IOException e) {
-
+                System.out.println("Somethings gone wrong!");
             }
         }
     }
 
-    public static void removeCity(){
+    public static void removeCity() {
+        Scanner input = new Scanner(System.in);
+        System.out.println("What city would you like to remove?");
+        String delete = input.nextLine();
 
+        // Define the full file path
+        String filePath = "/Users/bengray/Code/Java/Weather/src/main/java/UserCities.txt"; // Replace with the actual file path
+
+        // Create a temporary file to store modified content
+        File tempFile = new File("temp.txt");
+
+        try (
+                BufferedReader br = new BufferedReader(new FileReader(filePath));
+                BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile))
+        ) {
+            String line;
+
+            // Read each line from the original file
+            while ((line = br.readLine()) != null) {
+                // Check if the line contains the city to be removed
+                if (!line.equals(delete)) {
+                    // If it doesn't contain the city, write it to the temporary file
+                    bw.write(line);
+                    bw.newLine();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Replace the original file with the temporary file
+        if (tempFile.renameTo(new File(filePath))) {
+            System.out.println(delete + " has been removed from the file.");
+        } else {
+            System.out.println("Failed to remove " + delete + " from the file.");
+        }
     }
 
     public static void getCities() {
