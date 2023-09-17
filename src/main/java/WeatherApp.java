@@ -17,43 +17,61 @@ import  java.util.Scanner;
 //
 public class WeatherApp {
     public static void main(String[] args) {
-        Scanner scanner= new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
         boolean loggedIn = true;
-        int option;
-        while(loggedIn) {
-            getCities();
-            System.out.println("What would you like to do?\n1.Add City\n2.Remove City\n3.Exit");
-            option = scanner.nextInt();
-            switch (option){
-                case 1:
-                    addCity();
-                    break;
-                case 2:
-                    removeCity();
-                    break;
-                case 3:
-                    loggedIn = false;
-                    break;
-            }
 
+        // Load the list of cities once when the program starts
+        getCities();
+
+        while (loggedIn) {
+            try {
+                System.out.println("What would you like to do?\n1.Add City\n2.Remove City\n3.Exit");
+                int option = scanner.nextInt();
+                scanner.nextLine();
+
+                switch (option) {
+                    case 1:
+                        addCity();
+                        break;
+                    case 2:
+                        removeCity();
+                        break;
+                    case 3:
+                        loggedIn = false;
+                        break;
+                    default:
+                        System.out.println("Invalid option. Please try again.");
+                }
+            } catch (Exception e) {
+                System.out.println("That is not a valid number\nPlease try again");
+                scanner.nextLine();
+            }
         }
     }
 
     public static void addCity(){
         Scanner input = new Scanner(System.in);
-        System.out.println("What city would you like to add?");
-        String city = input.nextLine();
-        JsonObject info = cityInfo(city);
-        if(info != null) {
-            System.out.println("Is this the city?");
-            System.out.println(info);
-            try (FileWriter fw = new FileWriter("/Users/bengray/Code/Java/Weather/src/main/java/UserCities.txt", true);
-                 BufferedWriter bw = new BufferedWriter(fw);
-                 PrintWriter out = new PrintWriter(bw)) {
-                 out.println(city);
-                 System.out.println("Successfully added city!");
-            } catch (IOException e) {
-                System.out.println("Somethings gone wrong!");
+        boolean comp = false;
+        while(!comp) {
+            System.out.println("What city would you like to add?");
+            String city = input.nextLine();
+            JsonObject info = cityInfo(city);
+            if (info != null) {
+                System.out.println("Is this the city?(Y/N)");
+                printCityInfo(city, info);
+                //add lat and long for later
+                String conf = input.nextLine();
+                if (conf.equalsIgnoreCase("Y")) {
+                    try (FileWriter fw = new FileWriter("/Users/bengray/Code/Java/Weather/src/main/java/UserCities.txt", true);
+                         BufferedWriter bw = new BufferedWriter(fw);
+                         PrintWriter out = new PrintWriter(bw)) {
+                        out.println(city);
+                        System.out.println("Successfully added city!");
+                    } catch (IOException e) {
+                        System.out.println("Somethings gone wrong!");
+                    }
+                    comp = true;
+                }
             }
         }
     }
